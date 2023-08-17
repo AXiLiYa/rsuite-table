@@ -184,10 +184,13 @@ const useTableDimension = <Row extends RowDataType, Key>(props: TableDimensionPr
     contentWidth.current = nextContentWidth - (autoHeight ? SCROLLBAR_WIDTH : 0);
     columnCount.current = row?.querySelectorAll(`.${prefix('cell')}`).length || 0;
 
+    const height = fillHeight ? tableHeight.current : heightProp;
+    const tableBodyHeight = showHeader ? height - headerHeight : height;
+    const hasVerticalScrollbar = !autoHeight && contentHeight.current > tableBodyHeight;
+
     // The value of SCROLLBAR_WIDTH is subtracted so that the scroll bar does not block the content part.
-    // There is no vertical scroll bar after autoHeight.
     const minScrollWidth =
-      -(nextContentWidth - tableWidth.current) - (autoHeight ? 0 : SCROLLBAR_WIDTH);
+      -(nextContentWidth - tableWidth.current) - (hasVerticalScrollbar ? SCROLLBAR_WIDTH : 0);
 
     if (minScrollX.current !== minScrollWidth) {
       minScrollX.current = minScrollWidth;
@@ -209,7 +212,16 @@ const useTableDimension = <Row extends RowDataType, Key>(props: TableDimensionPr
     ) {
       onTableResizeChange?.(prevWidth, 'bodyWidthChanged');
     }
-  }, [autoHeight, onTableResizeChange, prefix, tableRef]);
+  }, [
+    autoHeight,
+    fillHeight,
+    headerHeight,
+    heightProp,
+    onTableResizeChange,
+    prefix,
+    showHeader,
+    tableRef
+  ]);
 
   const calculateTableWidth = useCallback(
     (nextWidth?: number) => {
